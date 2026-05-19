@@ -9,95 +9,104 @@
             --shelf-wood: #5d4037; 
             --shelf-shadow: #3e2723;
             --bg-wall: #f4f1ea;
+            --accent-green: #2e7d32;
+            --accent-brown: #4a3f35;
         }
         body { 
             font-family: -apple-system, sans-serif; 
             background: var(--bg-wall); 
             margin: 0; padding: 20px; 
-            padding-bottom: 100px;
+            padding-bottom: 150px; /* Space for stacked buttons */
         }
         
-        h1 { text-align: center; color: var(--shelf-wood); font-serif: serif; margin-bottom: 30px; }
+        h1 { text-align: center; color: var(--shelf-wood); margin-top: 40px; margin-bottom: 30px; font-weight: 300; letter-spacing: 1px; }
 
         /* The Shelf Styling */
         .shelf-container { 
             display: flex; flex-wrap: wrap; 
-            gap: 40px 0; justify-content: center; 
+            gap: 45px 0; justify-content: center; 
             max-width: 600px; margin: auto;
         }
         .shelf { 
-            width: 100%; border-bottom: 15px solid var(--shelf-wood); 
-            box-shadow: 0 10px 10px rgba(0,0,0,0.1);
+            width: 100%; border-bottom: 16px solid var(--shelf-wood); 
+            box-shadow: 0 10px 15px rgba(0,0,0,0.1);
             display: flex; align-items: flex-end; 
             padding: 0 10px; min-height: 120px;
             position: relative;
         }
-        .shelf::after {
-            content: ''; position: absolute; bottom: -20px; left: 0; width: 100%;
-            height: 5px; background: var(--shelf-shadow); opacity: 0.3;
-        }
 
         /* The Book Spines */
         .book {
-            width: 30px; height: 100px;
-            margin-right: 4px; border-radius: 2px 2px 0 0;
+            width: 32px; height: 100px;
+            margin-right: 4px; border-radius: 3px 3px 0 0;
             cursor: pointer; display: flex; align-items: center; justify-content: center;
             transition: transform 0.2s; position: relative;
-            box-shadow: inset -3px 0 5px rgba(0,0,0,0.2);
+            box-shadow: inset -4px 0 6px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
         }
-        .book:hover { transform: translateY(-10px); }
+        .book:active { transform: scale(0.95); }
         .book-title {
             writing-mode: vertical-rl; text-orientation: mixed;
             font-size: 10px; color: white; font-weight: bold;
-            overflow: hidden; max-height: 80px; text-align: center;
+            overflow: hidden; max-height: 85px; text-align: center;
+            pointer-events: none;
         }
 
         /* Modals */
-        #modal, #listModal { 
+        #modal, #listModal, #detailModal { 
             display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
             background: white; padding: 25px; border-radius: 20px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3); width: 85%; max-width: 400px; 
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3); width: 85%; max-width: 400px; 
             z-index: 10; max-height: 80vh; overflow-y: auto; 
         }
         .overlay { 
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.5); backdrop-filter: blur(3px); z-index: 5; 
+            background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 5; 
         }
 
         input, textarea { 
             width: 100%; margin: 8px 0; padding: 12px; box-sizing: border-box; 
-            border: 1px solid #ddd; border-radius: 8px; font-size: 16px; 
+            border: 1px solid #ddd; border-radius: 10px; font-size: 16px; 
         }
-        .btn-main { 
-            background: var(--shelf-wood); color: white; border: none; 
-            padding: 15px; width: 100%; border-radius: 10px; font-weight: bold; margin-top: 10px;
+        .btn-main { background: var(--shelf-wood); color: white; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; margin-top: 10px; }
+
+        /* Floating Action Buttons (Stacked Bottom Right) */
+        .fab-container {
+            position: fixed; bottom: 25px; right: 20px;
+            display: flex; flex-direction: column; gap: 12px; z-index: 4;
         }
-        .floating-btn {
-            position: fixed; left: 50%; transform: translateX(-50%);
-            color: white; border: none; padding: 12px 25px; border-radius: 30px; 
-            font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 4;
+        .fab {
+            padding: 15px 20px; border-radius: 50px; color: white; border: none;
+            font-weight: bold; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; text-decoration: none;
         }
-        .add-btn { top: 20px; background: #2e7d32; }
-        .view-btn { bottom: 20px; background: #4a3f35; }
-        .close-x { float: right; font-size: 24px; border: none; background: none; cursor: pointer; color: #999; }
-        .delete-btn { color: #e74c3c; font-size: 0.8rem; cursor: pointer; float: right; }
+        .add-fab { background: var(--accent-green); }
+        .list-fab { background: var(--accent-brown); }
+
+        .close-x { float: right; font-size: 28px; border: none; background: none; cursor: pointer; color: #bbb; margin-top: -10px; }
+        .delete-btn { color: #e74c3c; font-size: 0.85rem; cursor: pointer; float: right; font-weight: bold; }
+        
+        .detail-row { margin-bottom: 10px; font-size: 0.95rem; }
+        .detail-label { color: #888; font-size: 0.8rem; display: block; }
     </style>
 </head>
 <body>
 
-<button class="floating-btn add-btn" onclick="openAddModal()">+ Add New Book</button>
 <h1>My Library</h1>
 
-<div class="shelf-container" id="shelves">
-    </div>
+<div class="shelf-container" id="shelves"></div>
 
-<button class="floating-btn view-btn" onclick="openListModal()">📋 View the List</button>
+<div class="fab-container">
+    <button class="fab add-fab" onclick="openModal('modal')">＋ Add Book</button>
+    <button class="fab list-fab" onclick="openListModal()">📋 View List</button>
+</div>
 
 <div class="overlay" id="overlay" onclick="closeModals()"></div>
 
 <div id="modal">
     <button class="close-x" onclick="closeModals()">×</button>
-    <h3 id="modalTitle">Archive New Book</h3>
+    <h3 style="margin-top:0">Archive New Book</h3>
     <input type="text" id="title" placeholder="Book Title">
     <input type="text" id="writer" placeholder="Writer">
     <input type="text" id="translator" placeholder="Translator (optional)">
@@ -109,32 +118,43 @@
 
 <div id="listModal">
     <button class="close-x" onclick="closeModals()">×</button>
-    <h3>Reading History</h3>
+    <h3 style="margin-top:0">Reading History</h3>
     <div id="historyContent"></div>
+</div>
+
+<div id="detailModal">
+    <button class="close-x" onclick="closeModals()">×</button>
+    <h3 id="detTitle" style="color:var(--shelf-wood); margin-bottom:15px;"></h3>
+    <div class="detail-row"><span class="detail-label">Writer</span><span id="detWriter"></span></div>
+    <div class="detail-row"><span class="detail-label">Translator</span><span id="detTranslator"></span></div>
+    <div class="detail-row"><span class="detail-label">Publisher</span><span id="detPublisher"></span></div>
+    <div class="detail-row"><span class="detail-label">Read Date</span><span id="detDate"></span></div>
+    <div class="detail-row" style="margin-top:15px; border-top:1px solid #eee; padding-top:10px;"><span class="detail-label">My Review</span><p id="detReview" style="font-style:italic; line-height:1.5"></p></div>
 </div>
 
 <script>
     let library = JSON.parse(localStorage.getItem('myLibrary')) || [];
-    const colors = ['#264653', '#2a9d8f', '#e9c46a', '#f4a261', '#e76f51', '#6d597a', '#b56576', '#457b9d'];
+    const colors = ['#264653', '#2a9d8f', '#e9c46a', '#f4a261', '#e76f51', '#6d597a', '#b56576', '#457b9d', '#2c3e50', '#8e44ad'];
 
     function saveBook() {
+        const title = document.getElementById('title').value;
+        if(!title) return;
+
         const book = {
             id: Date.now(),
-            title: document.getElementById('title').value,
+            title: title,
             writer: document.getElementById('writer').value,
-            translator: document.getElementById('translator').value,
+            translator: document.getElementById('translator').value || '-',
             publisher: document.getElementById('publisher').value,
             readDate: document.getElementById('readDate').value,
             review: document.getElementById('review').value,
             color: colors[Math.floor(Math.random() * colors.length)]
         };
 
-        if(!book.title) return;
         library.push(book);
         localStorage.setItem('myLibrary', JSON.stringify(library));
         renderShelf();
         closeModals();
-        // Clear inputs
         document.querySelectorAll('input, textarea').forEach(i => i.value = '');
     }
 
@@ -142,7 +162,6 @@
         const container = document.getElementById('shelves');
         container.innerHTML = '';
         
-        // Group books by 10 per shelf
         let shelfCount = Math.ceil(library.length / 10) || 1;
         for (let i = 0; i < shelfCount; i++) {
             const shelfDiv = document.createElement('div');
@@ -162,29 +181,37 @@
     }
 
     function showBookDetails(book) {
-        alert(`📖 ${book.title}\nBy: ${book.writer}\nPublished by: ${book.publisher}\nRead on: ${book.readDate}\n\nReview: ${book.review}`);
+        document.getElementById('detTitle').innerText = book.title;
+        document.getElementById('detWriter').innerText = book.writer;
+        document.getElementById('detTranslator').innerText = book.translator;
+        document.getElementById('detPublisher').innerText = book.publisher;
+        document.getElementById('detDate').innerText = book.readDate;
+        document.getElementById('detReview').innerText = book.review || "No review left.";
+        
+        openModal('detailModal');
     }
 
-    function openAddModal() {
-        document.getElementById('modal').style.display = 'block';
+    function openModal(id) {
+        document.getElementById(id).style.display = 'block';
         document.getElementById('overlay').style.display = 'block';
     }
 
     function openListModal() {
         const content = document.getElementById('historyContent');
         content.innerHTML = library.map(b => `
-            <div style="border-bottom: 1px solid #eee; padding: 10px 0;">
+            <div style="border-bottom: 1px solid #eee; padding: 12px 0;">
                 <span class="delete-btn" onclick="deleteBook(${b.id})">Delete</span>
-                <strong>${b.title}</strong><br>
-                <small>${b.writer} | ${b.readDate}</small>
+                <div onclick='showBookDetails(${JSON.stringify(b).replace(/'/g, "&apos;")})'>
+                    <strong>${b.title}</strong><br>
+                    <small style="color:#666">${b.writer} | ${b.readDate}</small>
+                </div>
             </div>
-        `).join('') || "No books read yet.";
-        document.getElementById('listModal').style.display = 'block';
-        document.getElementById('overlay').style.display = 'block';
+        `).join('') || "Your bookshelf is empty.";
+        openModal('listModal');
     }
 
     function deleteBook(id) {
-        if(!confirm("Delete this book from history?")) return;
+        if(!confirm("Remove this book from your shelves?")) return;
         library = library.filter(b => b.id !== id);
         localStorage.setItem('myLibrary', JSON.stringify(library));
         renderShelf();
@@ -194,6 +221,7 @@
     function closeModals() {
         document.getElementById('modal').style.display = 'none';
         document.getElementById('listModal').style.display = 'none';
+        document.getElementById('detailModal').style.display = 'none';
         document.getElementById('overlay').style.display = 'none';
     }
 
