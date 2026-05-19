@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>My Personal Bookshelf</title>
+    <style>
+        :root { 
+            --shelf-wood: #5d4037; 
+            --shelf-shadow: #3e2723;
+            --bg-wall: #f4f1ea;
+        }
+        body { 
+            font-family: -apple-system, sans-serif; 
+            background: var(--bg-wall); 
+            margin: 0; padding: 20px; 
+            padding-bottom: 100px;
+        }
+        
+        h1 { text-align: center; color: var(--shelf-wood); font-serif: serif; margin-bottom: 30px; }
+
+        /* The Shelf Styling */
+        .shelf-container { 
+            display: flex; flex-wrap: wrap; 
+            gap: 40px 0; justify-content: center; 
+            max-width: 600px; margin: auto;
+        }
+        .shelf { 
+            width: 100%; border-bottom: 15px solid var(--shelf-wood); 
+            box-shadow: 0 10px 10px rgba(0,0,0,0.1);
+            display: flex; align-items: flex-end; 
+            padding: 0 10px; min-height: 120px;
+            position: relative;
+        }
+        .shelf::after {
+            content: ''; position: absolute; bottom: -20px; left: 0; width: 100%;
+            height: 5px; background: var(--shelf-shadow); opacity: 0.3;
+        }
+
+        /* The Book Spines */
+        .book {
+            width: 30px; height: 100px;
+            margin-right: 4px; border-radius: 2px 2px 0 0;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: transform 0.2s; position: relative;
+            box-shadow: inset -3px 0 5px rgba(0,0,0,0.2);
+        }
+        .book:hover { transform: translateY(-10px); }
+        .book-title {
+            writing-mode: vertical-rl; text-orientation: mixed;
+            font-size: 10px; color: white; font-weight: bold;
+            overflow: hidden; max-height: 80px; text-align: center;
+        }
+
+        /* Modals */
+        #modal, #listModal { 
+            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+            background: white; padding: 25px; border-radius: 20px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3); width: 85%; max-width: 400px; 
+            z-index: 10; max-height: 80vh; overflow-y: auto; 
+        }
+        .overlay { 
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.5); backdrop-filter: blur(3px); z-index: 5; 
+        }
+
+        input, textarea { 
+            width: 100%; margin: 8px 0; padding: 12px; box-sizing: border-box; 
+            border: 1px solid #ddd; border-radius: 8px; font-size: 16px; 
+        }
+        .btn-main { 
+            background: var(--shelf-wood); color: white; border: none; 
+            padding: 15px; width: 100%; border-radius: 10px; font-weight: bold; margin-top: 10px;
+        }
+        .floating-btn {
+            position: fixed; left: 50%; transform: translateX(-50%);
+            color: white; border: none; padding: 12px 25px; border-radius: 30px; 
+            font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 4;
+        }
+        .add-btn { top: 20px; background: #2e7d32; }
+        .view-btn { bottom: 20px; background: #4a3f35; }
+        .close-x { float: right; font-size: 24px; border: none; background: none; cursor: pointer; color: #999; }
+        .delete-btn { color: #e74c3c; font-size: 0.8rem; cursor: pointer; float: right; }
+    </style>
+</head>
+<body>
+
+<button class="floating-btn add-btn" onclick="openAddModal()">+ Add New Book</button>
+<h1>My Library</h1>
+
+<div class="shelf-container" id="shelves">
+    </div>
+
+<button class="floating-btn view-btn" onclick="openListModal()">📋 View the List</button>
+
+<div class="overlay" id="overlay" onclick="closeModals()"></div>
+
+<div id="modal">
+    <button class="close-x" onclick="closeModals()">×</button>
+    <h3 id="modalTitle">Archive New Book</h3>
+    <input type="text" id="title" placeholder="Book Title">
+    <input type="text" id="writer" placeholder="Writer">
+    <input type="text" id="translator" placeholder="Translator (optional)">
+    <input type="text" id="publisher" placeholder="Publishing Company">
+    <input type="date" id="readDate">
+    <textarea id="review" placeholder="Your Review..." rows="4"></textarea>
+    <button class="btn-main" onclick="saveBook()">Place on Shelf</button>
+</div>
+
+<div id="listModal">
+    <button class="close-x" onclick="closeModals()">×</button>
+    <h3>Reading History</h3>
+    <div id="historyContent"></div>
+</div>
+
+<script>
+    let library = JSON.parse(localStorage.getItem('myLibrary')) || [];
+    const colors = ['#264653', '#2a9d8f', '#e9c46a', '#f4a261', '#e76f51', '#6d597a', '#b56576', '#457b9d'];
+
+    function saveBook() {
+        const book = {
+            id: Date.now(),
+            title: document.getElementById('title').value,
+            writer: document.getElementById('writer').value,
+            translator: document.getElementById('translator').value,
+            publisher: document.getElementById('publisher').value,
+            readDate: document.getElementById('readDate').value,
+            review: document.getElementById('review').value,
+            color: colors[Math.floor(Math.random() * colors.length)]
+        };
+
+        if(!book.title) return;
+        library.push(book);
+        localStorage.setItem('myLibrary', JSON.stringify(library));
+        renderShelf();
+        closeModals();
+        // Clear inputs
+        document.querySelectorAll('input, textarea').forEach(i => i.value = '');
+    }
+
+    function renderShelf() {
+        const container = document.getElementById('shelves');
+        container.innerHTML = '';
+        
+        // Group books by 10 per shelf
+        let shelfCount = Math.ceil(library.length / 10) || 1;
+        for (let i = 0; i < shelfCount; i++) {
+            const shelfDiv = document.createElement('div');
+            shelfDiv.className = 'shelf';
+            
+            const shelfBooks = library.slice(i * 10, (i + 1) * 10);
+            shelfBooks.forEach(book => {
+                const bookDiv = document.createElement('div');
+                bookDiv.className = 'book';
+                bookDiv.style.backgroundColor = book.color;
+                bookDiv.innerHTML = `<div class="book-title">${book.title}</div>`;
+                bookDiv.onclick = () => showBookDetails(book);
+                shelfDiv.appendChild(bookDiv);
+            });
+            container.appendChild(shelfDiv);
+        }
+    }
+
+    function showBookDetails(book) {
+        alert(`📖 ${book.title}\nBy: ${book.writer}\nPublished by: ${book.publisher}\nRead on: ${book.readDate}\n\nReview: ${book.review}`);
+    }
+
+    function openAddModal() {
+        document.getElementById('modal').style.display = 'block';
+        document.getElementById('overlay').style.display = 'block';
+    }
+
+    function openListModal() {
+        const content = document.getElementById('historyContent');
+        content.innerHTML = library.map(b => `
+            <div style="border-bottom: 1px solid #eee; padding: 10px 0;">
+                <span class="delete-btn" onclick="deleteBook(${b.id})">Delete</span>
+                <strong>${b.title}</strong><br>
+                <small>${b.writer} | ${b.readDate}</small>
+            </div>
+        `).join('') || "No books read yet.";
+        document.getElementById('listModal').style.display = 'block';
+        document.getElementById('overlay').style.display = 'block';
+    }
+
+    function deleteBook(id) {
+        if(!confirm("Delete this book from history?")) return;
+        library = library.filter(b => b.id !== id);
+        localStorage.setItem('myLibrary', JSON.stringify(library));
+        renderShelf();
+        openListModal();
+    }
+
+    function closeModals() {
+        document.getElementById('modal').style.display = 'none';
+        document.getElementById('listModal').style.display = 'none';
+        document.getElementById('overlay').style.display = 'none';
+    }
+
+    renderShelf();
+</script>
+
+</body>
+</html>
