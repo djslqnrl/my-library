@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>My Personal Bookshelf</title>
+    <title>Book List</title>
     <style>
         :root { 
             --shelf-wood: #5d4037; 
@@ -16,12 +16,12 @@
             font-family: -apple-system, sans-serif; 
             background: var(--bg-wall); 
             margin: 0; padding: 20px; 
-            padding-bottom: 150px; /* Space for stacked buttons */
+            padding-bottom: 150px;
         }
         
+        /* Updated Header Style */
         h1 { text-align: center; color: var(--shelf-wood); margin-top: 40px; margin-bottom: 30px; font-weight: 300; letter-spacing: 1px; }
 
-        /* The Shelf Styling */
         .shelf-container { 
             display: flex; flex-wrap: wrap; 
             gap: 45px 0; justify-content: center; 
@@ -35,7 +35,6 @@
             position: relative;
         }
 
-        /* The Book Spines */
         .book {
             width: 32px; height: 100px;
             margin-right: 4px; border-radius: 3px 3px 0 0;
@@ -52,7 +51,6 @@
             pointer-events: none;
         }
 
-        /* Modals */
         #modal, #listModal, #detailModal { 
             display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
             background: white; padding: 25px; border-radius: 20px; 
@@ -70,7 +68,6 @@
         }
         .btn-main { background: var(--shelf-wood); color: white; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; margin-top: 10px; }
 
-        /* Floating Action Buttons (Stacked Bottom Right) */
         .fab-container {
             position: fixed; bottom: 25px; right: 20px;
             display: flex; flex-direction: column; gap: 12px; z-index: 4;
@@ -93,7 +90,7 @@
 </head>
 <body>
 
-<h1>My Library</h1>
+<h1>My Book List</h1>
 
 <div class="shelf-container" id="shelves"></div>
 
@@ -137,12 +134,12 @@
     const colors = ['#264653', '#2a9d8f', '#e9c46a', '#f4a261', '#e76f51', '#6d597a', '#b56576', '#457b9d', '#2c3e50', '#8e44ad'];
 
     function saveBook() {
-        const title = document.getElementById('title').value;
-        if(!title) return;
+        const titleInput = document.getElementById('title').value;
+        if(!titleInput) return;
 
         const book = {
             id: Date.now(),
-            title: title,
+            title: titleInput,
             writer: document.getElementById('writer').value,
             translator: document.getElementById('translator').value || '-',
             publisher: document.getElementById('publisher').value,
@@ -161,12 +158,10 @@
     function renderShelf() {
         const container = document.getElementById('shelves');
         container.innerHTML = '';
-        
         let shelfCount = Math.ceil(library.length / 10) || 1;
         for (let i = 0; i < shelfCount; i++) {
             const shelfDiv = document.createElement('div');
             shelfDiv.className = 'shelf';
-            
             const shelfBooks = library.slice(i * 10, (i + 1) * 10);
             shelfBooks.forEach(book => {
                 const bookDiv = document.createElement('div');
@@ -187,7 +182,6 @@
         document.getElementById('detPublisher').innerText = book.publisher;
         document.getElementById('detDate').innerText = book.readDate;
         document.getElementById('detReview').innerText = book.review || "No review left.";
-        
         openModal('detailModal');
     }
 
@@ -211,7 +205,7 @@
     }
 
     function deleteBook(id) {
-        if(!confirm("Remove this book from your shelves?")) return;
+        if(!confirm("Remove this book?")) return;
         library = library.filter(b => b.id !== id);
         localStorage.setItem('myLibrary', JSON.stringify(library));
         renderShelf();
